@@ -1,102 +1,56 @@
-# 📋 Quiz Application — Microservices Architecture
+# 📋 JobSearch MongoDB — React & Spring Boot Application
 
 ## Overview
-This is a Quiz Application built using Java Spring Boot with a microservices architecture. The application is split into 4 independent services that communicate with each other to create quizzes, serve questions, and calculate scores. It demonstrates how requests are routed and handled between microservices using Eureka Service Discovery, Spring Cloud Gateway, and OpenFeign for inter-service communication.
+This is a Full-Stack Job Search Application showcasing seamless integration between a Java Spring Boot backend and a React frontend, powered by **MongoDB Atlas** as the cloud database provider. Instead of a traditional local database, this project connects to a live MongoDB Atlas cluster, utilizing Spring Data MongoDB to securely store, retrieve, and map dynamic BSON documents representing job postings, required technologies, and experience profiles directly to our React UI.
 
 ## 🏗️ Architecture & Request Flow
-The diagram below illustrates the high-level architecture and the specific request flow for creating a quiz. The Quiz Service depends on the Question Service to fetch questions via OpenFeign.
+1. Client sends a request to the React Frontend.
+2. The Frontend routes API requests to the Spring Boot REST API safely.
+3. The Spring Boot backend uses `Spring Data MongoDB` to fetch and store job profiles, descriptions, required technologies, and experience levels against a MongoDB cluster.
+4. Data is seamlessly mapped from MongoDB `BSON` documents to Java objects and served as JSON payloads to React.
 
-**Quiz Application Architecture and Request Flow:**
-1. Client sends a request to the API Gateway.
-2. API Gateway uses Eureka to discover the target service and routes the request.
-3. Quiz Service handles quiz-related requests and internally calls the Question Service to fetch/manage questions.
-4. Each service maintains its own PostgreSQL database (`quizdb` and `questiondb`) to ensure data isolation.
-
-## 📦 Services Breakdown
-
-### 1. 🛰️ Service Registry (Port 8761)
-- **Role:** Eureka Server — the central hub for service discovery.
-- **Registration:** All other services register themselves here on startup.
-- **Configuration:** Set with `register-with-eureka=false` and `fetch-registry=false` as it is the server itself.
-
-### 2. ⚡ API Gateway (Port 8765)
-- **Role:** Single entry point for all client requests.
-- **Routing:** Uses Spring Cloud Gateway to automatically route requests based on the service name in the URL (e.g., `/question-service/...`).
-
-### 3. ❓ Question Service (Port 8083)
-- **Role:** Manages the question bank.
-- **Database:** `questiondb` (PostgreSQL).
-- **Endpoints:**
-  - `GET /question/allQuestions` — Get all questions.
-  - `GET /question/category/{category}` — Get questions by category.
-  - `POST /question/add` — Add a new question.
-  - `POST /question/getScore` — Calculate score from submitted responses.
-- **Logic:** Uses a native SQL query with `ORDER BY RANDOM() LIMIT :numQ` to pick random questions.
-
-### 4. 📝 Quiz Service (Port 8090)
-- **Role:** Manages quiz creation, question retrieval, and scoring.
-- **Database:** `quizdb` (PostgreSQL).
-- **Endpoints:**
-  - `POST /quiz/create` — Create a quiz (category, number of questions, title).
-  - `GET /quiz/get/{id}` — Get quiz questions by quiz ID.
-  - `POST /quiz/submit/{id}` — Submit answers and get score.
-- **Communication:** Annotated with `@FeignClient(name = "QUESTION-SERVICE")` to call Question Service endpoints.
-
-## 🛠️ Tech Stack
+## 📦 Tech Stack
 | Technology | Purpose |
 | :--- | :--- |
-| **Java 17+** | Programming language |
-| **Spring Boot** | Application framework |
-| **Spring Cloud Eureka** | Service discovery & registration |
-| **Spring Cloud Gateway** | API Gateway / request routing |
-| **Spring Cloud OpenFeign** | Declarative inter-service REST calls |
-| **Spring Data JPA** | Database access (ORM) |
-| **PostgreSQL** | Relational database (2 databases) |
-| **Lombok** | Boilerplate code reduction (`@Data`) |
+| **Java 21+** | Main backend programming language |
+| **Spring Boot** | Backend application framework |
+| **React** | Frontend UI interface |
+| **MongoDB** | NoSQL Document Database |
+| **Axios** | HTTP requests from React to Spring Boot |
 | **Maven** | Build & dependency management |
 
 ---
 
 ## 🚀 How to Run the Application
 
-Follow these steps to safely start the entire microservice architecture:
+Follow these steps to safely start both frontend and backend servers.
 
 ### Prerequisites:
-1. Make sure you have **Java 17** (or above) installed.
-2. Make sure you have **PostgreSQL** installed and running locally on port `5432`.
-3. Create two empty databases in PostgreSQL: `questiondb` and `quizdb`.
+1. Make sure you have **Java 17/21** or above installed.
+2. Make sure you have **Node.js** installed.
+3. Have a MongoDB cluster (e.g., MongoDB Atlas) ready to connect.
 
 ### Step-by-Step Execution:
-> **⚠️ IMPORTANT:** The services **must** be started in the following specific order. Wait for each service to fully start up (check the console logs) before moving to the next one!
 
-**1. Start the Eureka Service Registry:**
-Open a terminal, navigate to the `serviceregistry` folder and run:
-```bash
-./mvnw spring-boot:run
-```
-Wait until you see it running on `http://localhost:8761`.
+**1. Configure the Database & Ports:**
+Navigate to `SpringMongoDB/src/main/resources/application.properties` and replace the placeholders to match your MongoDB credentials and preferred backend localhost port.
+*Note: Make sure to also update the identical backend port placeholder inside the React frontend files (`Feed.js` and `Create.js`) so they can successfully communicate!*
 
-**2. Start the API Gateway:**
-Open a new terminal, navigate to the `apigateway` folder and run:
-```bash
-./mvnw spring-boot:run
-```
-Wait until it connects to Eureka.
-
-**3. Start the Question Service:**
-Open a new terminal, navigate to the `question-service` folder and run:
+**2. Start the Spring Boot Backend:**
+Open a terminal, navigate to the `SpringMongoDB` folder and run:
 ```bash
 ./mvnw spring-boot:run
 ```
 
-**4. Start the Quiz Service:**
-Open a new terminal, navigate to the `quiz-service` folder and run:
+**3. Start the React Frontend:**
+Open a new terminal, navigate to the `UISpringMongodb-main` folder and run:
 ```bash
-./mvnw spring-boot:run
+npm install
+npm start
 ```
 
 ### Verification:
-Once everything is started, you can go to your browser and open **`http://localhost:8761`**. You should see the Eureka dashboard with all 3 clients (API Gateway, Question Service, Quiz Service) successfully registered and available!
+Go to your browser and open **`http://localhost:3000`** to view the app!
 
 ---
 
@@ -105,12 +59,11 @@ Once everything is started, you can go to your browser and open **`http://localh
 To make the application more robust and user-friendly, the following features and technical improvements are planned:
 
 ### Frontend Enhancements
-- **Dynamic Filtering:** Add a filter button/sidebar to easily sort and filter job postings/questions by exact categories, required experience, and specific tech stacks.
+- **Dynamic Filtering:** Add a filter button/sidebar to easily sort and filter job postings by exact categories, required experience, and specific tech stacks.
 - **Pagination:** Implement pagination on the frontend to handle large lists of data instead of fetching all records at once.
 - **Search Optimization:** Improve the current text-based search to use a modern datagrid with debounce.
 
 ### Backend Improvements
-- **Remove Hardcoded Values:** Eliminate hardcoded constants inside services (such as fixed ascending sorts or hardcoded SQL `LIMIT` parameters) and convert them to dynamic `application.properties` configurations or query parameters.
-- **Improved Logging & Tracing:** Integrate Spring Cloud Sleuth and Zipkin for distributed tracing to monitor exactly how requests flow through the Gateway, Quiz Service, and Question Service.
-- **Error Handling:** Implement Global Exception Handling in all microservices using `@ControllerAdvice` to provide standardized error responses to the frontend.
-- **Containerization:** Create Dockerfiles and a `docker-compose.yml` to spin up Eureka, the API Gateway, Microservices, and PostgreSQL databases with a single `docker-compose up` command.
+- **Remove Hardcoded Values:** Eliminate hardcoded constants inside controllers (such as fixed ascending sorts or hardcoded SQL/MongoDB constraints) and convert them to dynamic `application.properties` configurations or generic query parameters.
+- **Improved Logging & Tracing:** Integrate standardized logging tools to monitor exactly how requests flow through the application.
+- **Error Handling:** Implement Global Exception Handling in the Spring Boot backend using `@ControllerAdvice` to provide clean, standardized JSON error responses back to the frontend.
