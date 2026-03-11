@@ -19,11 +19,11 @@ const Feed = () => {
   //
   useEffect(() => {
     const fetchPosts = async () => {
-      const response = await axios.get(`http://localhost:8081/posts/${query}`);
+      const response = await axios.get(`http://localhost:<YOUR_BACKEND_PORT>/posts/${query}`);
       setPost(response.data);
     };
     const fetchInitialPosts = async () => {
-        const response = await axios.get(`http://localhost:8081/allPosts`);
+        const response = await axios.get(`http://localhost:<YOUR_BACKEND_PORT>/allPosts`);
         console.log(response);
         setPost(response.data);
     }

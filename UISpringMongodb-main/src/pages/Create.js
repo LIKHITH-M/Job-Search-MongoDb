@@ -32,7 +32,7 @@ const Create = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    fetch("http://localhost:8081/post", {
+    fetch("http://localhost:<YOUR_BACKEND_PORT>/post", {
       method: "POST", // or 'PUT'
       headers: {
         "Content-Type": "application/json",
